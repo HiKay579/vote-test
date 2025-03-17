@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Modèle pour les utilisateurs
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  votes         Vote[]    @relation("CreatedVotes") // Votes créés par l'administrateur
+  userVotes     UserVote[] // Votes auxquels l'utilisateur a participé
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// Modèle pour les votes
+model Vote {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  startDate     DateTime  @default(now())
+  endDate       DateTime?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     User      @relation("CreatedVotes", fields: [createdById], references: [id])
+  createdById   String
+  options       VoteOption[]
+  userVotes     UserVote[]
+}
+
+// Modèle pour les options de vote
+model VoteOption {
+  id            String    @id @default(cuid())
+  text          String
+  vote          Vote      @relation(fields: [voteId], references: [id], onDelete: Cascade)
+  voteId        String
+  userVotes     UserVote[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// Modèle pour les votes des utilisateurs
+model UserVote {
+  id            String    @id @default(cuid())
+  user          User      @relation(fields: [userId], references: [id])
+  userId        String
+  vote          Vote      @relation(fields: [voteId], references: [id])
+  voteId        String
+  option        VoteOption @relation(fields: [optionId], references: [id])
+  optionId      String
+  createdAt     DateTime  @default(now())
+
+  @@unique([userId, voteId])
+}
