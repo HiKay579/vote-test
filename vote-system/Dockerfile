@@ -21,7 +21,7 @@ COPY prisma ./prisma/
 
 # Installation des dépendances
 RUN pnpm install --frozen-lockfile
-RUN pnpm add -D autoprefixer postcss tailwindcss date-fns
+RUN pnpm add -D autoprefixer postcss postcss-preset-env tailwindcss date-fns @types/node @types/react @types/react-dom typescript
 
 # Copie du code source
 COPY . .
