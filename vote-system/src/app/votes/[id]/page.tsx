@@ -1,92 +1,52 @@
-import { notFound } from "next/navigation";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
 import { VoteForm } from "@/components/vote-form";
-import { VoteResults } from "@/components/vote-results";
+import { notFound } from "next/navigation";
 
-interface VotePageProps {
-  params: {
-    id: string;
-  };
-}
 
-export default async function VotePage({ params }: VotePageProps) {
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function VotePage({ params }: Props) {
   const user = await getCurrentUser();
-  
-  if (!user) {
-    return notFound();
-  }
+  const { id } = await params;
 
   const vote = await prisma.vote.findUnique({
-    where: {
-      id: params.id,
-    },
+    where: { id },
     include: {
-      options: {
-        include: {
-          _count: {
-            select: {
-              userVotes: true,
-            },
-          },
-        },
-      },
+      options: true,
       userVotes: {
-        where: {
-          userId: user.id,
-        },
-        include: {
-          option: true,
-        },
-      },
-      _count: {
-        select: {
-          userVotes: true,
-        },
+        where: user ? { userId: user.id } : undefined,
       },
     },
   });
 
   if (!vote) {
-    return notFound();
+    notFound();
   }
 
-  const hasVoted = vote.userVotes.length > 0;
-  const userVote = vote.userVotes[0];
-  const totalVotes = vote._count.userVotes;
+  const hasVoted = user && vote.userVotes.length > 0;
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
-      <div className="space-y-2">
+      <div>
         <h1 className="text-3xl font-bold">{vote.title}</h1>
         {vote.description && (
-          <p className="text-muted-foreground">{vote.description}</p>
+          <p className="text-muted-foreground mt-2">{vote.description}</p>
         )}
       </div>
 
-      <div className="space-y-2 text-sm">
-        <p>
-          <span className="text-muted-foreground">Début:</span>{" "}
-          {format(new Date(vote.startDate), "Pp", { locale: fr })}
-        </p>
-        {vote.endDate && (
-          <p>
-            <span className="text-muted-foreground">Fin:</span>{" "}
-            {format(new Date(vote.endDate), "Pp", { locale: fr })}
-          </p>
-        )}
-        <p>
-          <span className="text-muted-foreground">Participants:</span>{" "}
-          {totalVotes}
-        </p>
-      </div>
-
-      {hasVoted ? (
-        <VoteResults vote={vote} userVoteId={userVote.optionId} />
+      {!hasVoted && vote.isActive ? (
+        <VoteForm vote={vote} />
       ) : (
-        <VoteForm vote={vote} userId={user.id} />
+        <div className="text-center py-8">
+          {!vote.isActive ? (
+            <p className="text-muted-foreground">Ce vote est actuellement fermé.</p>
+          ) : (
+            <p className="text-muted-foreground">Vous avez déjà voté.</p>
+          )}
+        </div>
       )}
     </div>
   );

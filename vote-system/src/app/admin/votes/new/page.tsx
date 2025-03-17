@@ -48,6 +48,7 @@ export default function NewVotePage() {
       toast.success("Vote créé avec succès");
       router.push(`/votes/${vote.id}`);
     } catch (error) {
+      console.error("Erreur lors de la création du vote:", error);
       toast.error("Une erreur est survenue lors de la création du vote");
     } finally {
       setIsSubmitting(false);

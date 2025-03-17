@@ -14,7 +14,7 @@ import {
 import { User } from "@/types";
 
 interface UserMenuProps {
-  user: User | undefined;
+  user: User | null;
 }
 
 export function UserMenu({ user }: UserMenuProps) {

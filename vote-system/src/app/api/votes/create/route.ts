@@ -35,7 +35,11 @@ export async function POST(request: Request) {
         title,
         description,
         endDate: endDate ? new Date(endDate) : null,
-        createdById: user.id,
+        createdBy: {
+          connect: {
+            id: user.id
+          }
+        },
         options: {
           create: options.map((text: string) => ({
             text,

@@ -8,10 +8,9 @@ import { Button } from "@/components/ui/button";
 
 interface VoteFormProps {
   vote: Vote;
-  userId: string;
 }
 
-export function VoteForm({ vote, userId }: VoteFormProps) {
+export function VoteForm({ vote }: VoteFormProps) {
   const router = useRouter();
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,19 +32,20 @@ export function VoteForm({ vote, userId }: VoteFormProps) {
         },
         body: JSON.stringify({
           voteId: vote.id,
-          optionId: selectedOption,
-          userId,
+          optionId: selectedOption
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Erreur lors de la soumission du vote");
+        const data = await response.json();
+        throw new Error(data.message || "Erreur lors du vote");
       }
 
       toast.success("Vote enregistré avec succès");
       router.refresh();
     } catch (error) {
-      toast.error("Une erreur est survenue lors de la soumission du vote");
+      console.error("Erreur lors du vote:", error);
+      toast.error(error instanceof Error ? error.message : "Une erreur est survenue lors du vote");
     } finally {
       setIsSubmitting(false);
     }

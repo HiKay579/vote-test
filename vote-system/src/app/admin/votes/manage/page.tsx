@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -30,24 +30,25 @@ export default function ManageVotesPage() {
   const [votes, setVotes] = useState<Vote[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchVotes();
-  }, []);
-
-  async function fetchVotes() {
+  const fetchVotes = useCallback(async () => {
     try {
       const response = await fetch("/api/votes/manage");
       if (!response.ok) throw new Error("Erreur lors du chargement des votes");
       const data = await response.json();
       setVotes(data);
     } catch (error) {
+      console.error("Erreur lors du chargement des votes:", error);
       toast.error("Erreur lors du chargement des votes");
     } finally {
       setIsLoading(false);
     }
-  }
+  }, []);
 
-  async function toggleVoteStatus(voteId: string, currentStatus: boolean) {
+  useEffect(() => {
+    fetchVotes();
+  }, [fetchVotes]);
+
+  const toggleVoteStatus = useCallback(async (voteId: string, currentStatus: boolean) => {
     try {
       const response = await fetch(`/api/votes/${voteId}/toggle-status`, {
         method: "PATCH",
@@ -62,9 +63,10 @@ export default function ManageVotesPage() {
       toast.success(`Vote ${currentStatus ? "désactivé" : "activé"} avec succès`);
       fetchVotes();
     } catch (error) {
+      console.error("Erreur lors de la modification du statut:", error);
       toast.error("Erreur lors de la modification du statut");
     }
-  }
+  }, [fetchVotes]);
 
   if (isLoading) {
     return <div className="text-center">Chargement...</div>;

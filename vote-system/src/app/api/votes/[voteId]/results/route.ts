@@ -2,12 +2,17 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 
+type RouteContext = {
+  params: Promise<{ voteId: string }>;
+};
+
 export async function GET(
   request: Request,
-  { params }: { params: { voteId: string } }
+  context: RouteContext
 ) {
   try {
     const user = await getCurrentUser();
+    const { voteId } = await context.params;
 
     if (!user) {
       return NextResponse.json(
@@ -25,7 +30,7 @@ export async function GET(
 
     const vote = await prisma.vote.findUnique({
       where: {
-        id: params.voteId,
+        id: voteId,
       },
       include: {
         options: {

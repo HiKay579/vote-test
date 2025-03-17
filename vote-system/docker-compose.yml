@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  vote-app:
+    build: .
+    container_name: vote-app
+    env_file:
+      - .env
+    ports:
+      - "3006:3006"
+    networks:
+      - vote-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_APP_URL=https://vote.hipp-dev.fr
+      - PORT=3006
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL}
+
+networks:
+  vote-network: 

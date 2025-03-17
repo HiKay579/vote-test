@@ -30,11 +30,12 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/votes");
+      router.push("/");
       router.refresh();
       toast.success("Connexion réussie");
     } catch (error) {
-      toast.error("Une erreur est survenue");
+      console.error("Erreur lors de la connexion:", error);
+      toast.error("Une erreur est survenue lors de la connexion");
     } finally {
       setIsLoading(false);
     }

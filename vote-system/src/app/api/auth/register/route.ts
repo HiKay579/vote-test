@@ -31,17 +31,21 @@ export async function POST(request: Request) {
     // Créer l'utilisateur
     const user = await prisma.user.create({
       data: {
-        name,
         email,
         password: hashedPassword,
-        role: "USER",
-      },
+        name,
+        role: "USER"
+      }
     });
 
-    // Ne pas renvoyer le mot de passe
-    const { password: _, ...userWithoutPassword } = user;
-
-    return NextResponse.json(userWithoutPassword, { status: 201 });
+    return NextResponse.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      }
+    });
   } catch (error) {
     console.error("Erreur lors de l'inscription:", error);
     return NextResponse.json(
