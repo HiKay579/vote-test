@@ -15,7 +15,7 @@ COPY package*.json ./
 COPY pnpm-lock.yaml ./
 COPY tsconfig*.json ./
 COPY postcss.config.mjs ./
-COPY tailwind.config.ts ./
+COPY tailwind.config.js ./
 COPY next.config.ts ./
 COPY prisma ./prisma/
 
