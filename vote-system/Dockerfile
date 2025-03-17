@@ -21,6 +21,7 @@ COPY prisma ./prisma/
 
 # Installation des dépendances
 RUN pnpm install --frozen-lockfile
+RUN pnpm add -D autoprefixer postcss tailwindcss date-fns
 
 # Copie du code source
 COPY . .
@@ -28,8 +29,6 @@ COPY . .
 # Build
 RUN pnpm prisma generate
 RUN pnpm run build
-
-
 
 # Port pour l'application
 EXPOSE 3006
